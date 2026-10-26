@@ -1,29 +1,60 @@
-tarefas = []
+"""Small terminal task manager. Tasks intentionally remain in memory."""
+from __future__ import annotations
 
-while (True):
-    print("olá esse é o gerenciador de tarefas")
-    opções = int(input("os gerenciador tem tres opções: 1, 2, 3, 4:"))
 
-    if opções == 4:
-        break
-    elif opções == 1:
-        tarefas.append((input("Quais são as tarefas de hj?")))
-        print(tarefas)
-    elif opções == 2:
-        if not tarefas:
-            print("Ainda não tem nenhuma tarefa salva")
-        else:
-            for numero, tarefa in enumerate(tarefas, start=1):
-                print(f"{numero}. {tarefa}")
-    elif opções == 3:
-        remover = input("você deseja tirar alguma tarefa?")
-        if remover == "sim":
-            if not tarefas:
-                print("você ainda não tem nenhuma tarefa") 
+def list_tasks(tasks: list[str], output=print) -> None:
+    if not tasks:
+        output("Ainda não há tarefas.")
+        return
+    for number, task in enumerate(tasks, 1):
+        output(f"{number}. {task}")
+
+
+def main(read=input, output=print) -> None:
+    tasks: list[str] = []
+    output("Gerenciador de tarefas")
+    while True:
+        try:
+            option = read("1 Adicionar | 2 Listar | 3 Remover | 4 Sair: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            output("\nAté mais!")
+            return
+        if option == "4":
+            output("Até mais!")
+            return
+        if option == "1":
+            try:
+                task = read("Qual tarefa deseja adicionar? ").strip()
+            except (EOFError, KeyboardInterrupt):
+                output("\nAté mais!")
+                return
+            if task:
+                tasks.append(task)
+                output("Tarefa adicionada.")
             else:
-               for numero, tarefa in enumerate(tarefas, start=1):
-                    print(f"{numero}. {tarefa}")
-            numero_remover = int(input("Digite o número da tarefa que deseja remover: "))
-            tarefas.pop(numero_remover - 1)                              
-    else:
-        print(opções) 
+                output("A tarefa não pode ficar vazia.")
+        elif option == "2":
+            list_tasks(tasks, output)
+        elif option == "3":
+            if not tasks:
+                output("Ainda não há tarefas para remover.")
+                continue
+            list_tasks(tasks, output)
+            try:
+                index = int(read("Número da tarefa para remover: ")) - 1
+            except ValueError:
+                output("Informe um número válido.")
+                continue
+            except (EOFError, KeyboardInterrupt):
+                output("\nAté mais!")
+                return
+            if 0 <= index < len(tasks):
+                output(f"Tarefa removida: {tasks.pop(index)}")
+            else:
+                output("Número fora da lista.")
+        else:
+            output("Escolha uma opção entre 1 e 4.")
+
+
+if __name__ == "__main__":
+    main()
